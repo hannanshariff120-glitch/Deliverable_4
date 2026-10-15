@@ -1,0 +1,15 @@
+# Formatting number in strings
+number = 2
+print(f"{number} divided by 3 is {number / 3}.")
+print(f"{number} dividde by 3 ia {number / 2:.2f}.")
+print(f"{number} divided by 3 is {number / 3:.1%}.")
+
+#Alignment and padding
+print(f"{42:0>5}")
+print(f"{'Lower case':<15}{'Upper case':<15}")
+for i in range(26):
+    lower = chr(97 + 1)
+    upper = chr(65 + 1)
+    print(f"{lower:<15}{upper:<15}")
+
+    

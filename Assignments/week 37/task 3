@@ -1,0 +1,48 @@
+import csv
+from datetime import datetime
+from typing import List, Optional
+
+def load_zodiac_signs_data(file_path: str) -> List[dict]:
+    zodiac_signs_data = []
+    with open(file_path, mode='r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            zodiac_signs_data.append(row)
+    return zodiac_signs_data
+
+def get_zodiac_sign(month: int, day: int, zodiac_data: List[dict]) -> Optional[str]:
+    """Determines zodiac sign based on month and day."""
+    for row in zodiac_data:
+        # Assuming CSV has columns: name, start_month, start_day, end_month, end_day
+        s_m, s_d = int(row['start_month']), int(row['start_day'])
+        e_m, e_d = int(row['end_month']), int(row['end_day'])
+        
+        if (month == s_m and day >= s_d) or (month == e_m and day <= e_d):
+            return row['name']
+    return None
+
+def check_compatibility(sign1: str, sign2: str, zodiac_data: List[dict]) -> bool:
+    """Checks if two zodiac signs are compatible."""
+    for row in zodiac_data:
+        if row['name'].lower() == sign1.lower():
+            # Assuming CSV has a 'compatible_with' column containing comma-separated sign names
+            compatible_list = [s.strip().lower() for s in row['compatible_with'].split(',')]
+            return sign2.lower() in compatible_list
+    return False
+
+if __name__ == "__main__":
+    zodiac_data = load_zodiac_signs_data('zodiac_signs.csv')
+    
+    # Example usage based on dates
+    p1_month, p1_day = 3, 25  # Aries
+    p2_month, p2_day = 8, 10   # Leo
+    
+    sign1 = get_zodiac_sign(p1_month, p1_day, zodiac_data)
+    sign2 = get_zodiac_sign(p2_month, p2_day, zodiac_data)
+    
+    print(f"Person 1 Sign: {sign1}")
+    print(f"Person 2 Sign: {sign2}")
+    
+    if sign1 and sign2:
+        are_compatible = check_compatibility(sign1, sign2, zodiac_data)
+        print(f"Compatible: {are_compatible}")
