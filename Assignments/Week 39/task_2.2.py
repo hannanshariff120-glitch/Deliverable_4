@@ -2,16 +2,20 @@ import csv
 from pathlib import Path
 
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
 def process_sequencing_data(
-    seq_folder_path: str, output_manifest_path: str = "sequencing_manifest.csv"
+    seq_folder_path: str,
+    output_manifest_path: str = "sequencing_manifest.csv",
 ):
     """Iterates through sequencing files in `seq_folder_path`, parses header lines
 
     starting with '##', extracts study_id and patient_id, and writes a
     summary CSV manifest.
     """
-    seq_folder = Path(seq_folder_path)
-    output_path = Path(output_manifest_path)
+    seq_folder = Path(seq_folder_path).resolve()
+    output_path = (SCRIPT_DIR / output_manifest_path).resolve()
 
     # Check if folder exists to avoid FileNotFoundError
     if not seq_folder.exists():
@@ -33,14 +37,14 @@ def process_sequencing_data(
         # Read line-by-line efficiently to handle large gigabyte-scale files
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             for line in f:
-                # Stop reading immediately once header lines (##) end[cite: 1]
+                # Stop reading immediately once header lines (##) end
                 if not line.startswith("##"):
                     break
 
                 # Clean line content
                 clean_line = line.strip().lstrip("#")
 
-                # Parse key-value pairs (e.g., study_id = A12 or study_id=A12)[cite: 1]
+                # Parse key-value pairs (e.g., study_id = A12 or study_id=A12)
                 if "=" in clean_line:
                     key, val = clean_line.split("=", 1)
                     key = key.strip().lower()
@@ -53,15 +57,19 @@ def process_sequencing_data(
 
         # Append to manifest if both IDs were identified
         if study_id and patient_id:
-            # Consistent unique_id generation matching Task 1 logic[cite: 1]
+            # Consistent unique_id generation matching Task 1 logic
             try:
                 p_id_int = int(patient_id)
-                unique_id = f"{study_id}_{p_id_int:04d}"
+                unique_id = f"{study_id}_{p_id_int:03d}"
             except ValueError:
                 unique_id = f"{study_id}_{patient_id}"
 
-            # Calculate relative path from script directory
-            relative_path = file_path.as_posix()
+            # Calculate a stable relative path; if the input directory is not under
+            # the project root, fall back to the directory-local filename.
+            if file_path.is_relative_to(seq_folder):
+                relative_path = file_path.relative_to(seq_folder).as_posix()
+            else:
+                relative_path = file_path.as_posix()
 
             manifest_rows.append(
                 {
@@ -72,7 +80,7 @@ def process_sequencing_data(
                 }
             )
 
-    # Write output CSV file[cite: 1]
+    # Write output CSV file
     fieldnames = [
         "unique_id",
         "study_id",
@@ -87,10 +95,10 @@ def process_sequencing_data(
 
 if __name__ == "__main__":
     # Ensure folder exists prior to running
-    raw_dir = Path("raw_sequencing_data")
+    raw_dir = SCRIPT_DIR / "raw_sequencing_data"
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     process_sequencing_data(
-        seq_folder_path="raw_sequencing_data",
+        seq_folder_path=str(raw_dir),
         output_manifest_path="sequencing_manifest.csv",
     )

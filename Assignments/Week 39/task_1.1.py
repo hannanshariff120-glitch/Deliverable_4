@@ -2,9 +2,16 @@ from pathlib import Path
 
 import pandas as pd
 
-# Define paths
-input_csv = "psa_clinical_data.csv"
-project_root = Path("project_root")
+# Define paths relative to this script so it works from any terminal working directory.
+SCRIPT_DIR = Path(__file__).resolve().parent
+input_csv = SCRIPT_DIR / "psa_clinical_data.csv"
+project_root = SCRIPT_DIR / "project_root"
+
+if not input_csv.exists():
+    raise FileNotFoundError(
+        f"Input dataset not found at '{input_csv}'. "
+        "Make sure 'psa_clinical_data.csv' is in the same folder as this script."
+    )
 
 # Load and prepare data
 df = pd.read_csv(input_csv)
@@ -62,5 +69,4 @@ for study_id, study_group in df.groupby("study_id"):
     summary_df.sort_values("unique_id", inplace=True)
     summary_file_path = study_dir / f"{study_id}_summary.csv"
     summary_df.to_csv(summary_file_path, index=False)
-
 
