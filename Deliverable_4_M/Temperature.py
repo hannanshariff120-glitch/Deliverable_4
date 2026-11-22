@@ -5,6 +5,12 @@ class Temperature:
         if unit != "C" and unit != "K" and unit != "F":
             raise ValueError("The temperature must be in C, K or F")
         self._unit = unit
+        if unit == "K" and value < 0:
+            raise ValueError("The temperature can't be bellow absolute zero")
+        if unit == "C" and value < -273.15:
+            raise ValueError("The temperature can't be bellow absolute zero")
+        if unit == "F" and value < -459.67:
+            raise ValueError("The temperature can't be bellow absolute zero")
         self._value = value
 
     @property
@@ -36,7 +42,7 @@ class Temperature:
             return self._value * 9 / 5 + 32
         return (self._value - 273.15) * 9 / 5 + 32
 
-    def convert_to(self, target_unit: str) -> Temperature:
+    def convert_to(self, target_unit: str):
         if target_unit.upper() == "C":
             c_value = self.to_celsius()
             return Temperature(c_value, target_unit)
@@ -52,7 +58,7 @@ class Temperature:
         raise ValueError("The temperature must be in C, K or F")
 
     def __repr__(self):
-        return f"Temperature({self._value}, {self._unit})"
+        return f"Temperature({self._value:.1f}, '{self._unit}')"
 
     def __str__(self):
         return f"{self._value:.2f}°{self._unit}"
