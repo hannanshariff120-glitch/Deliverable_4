@@ -1,0 +1,4 @@
+cd Deliverable-4
+.\venv\Scripts\Activate.ps1
+pip install pytest
+pytest
